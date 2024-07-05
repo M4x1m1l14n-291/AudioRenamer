@@ -91,6 +91,7 @@ void playDir(char const *dir)
     exit(0);
 }
 
+// Scan the 'path' directory
 void scanDirectory(char const *path)
 {
     printf("scanning directory %s\n\n", path);
@@ -112,7 +113,7 @@ void scanDirectory(char const *path)
         appendNode(Files, entry->d_name);
     }
 
-    printList(Files);
+    // printList(Files);
     closedir(dir);
 }
 
@@ -131,15 +132,23 @@ int isAudioFile(char *name)
     return false;
 }
 
+// Read audio volume from config file
 void readVolume()
 {
+    char *homeDir = getenv("HOME");
+    if (homeDir == NULL)
+        return;
+
+    char dirBuf[strlen(homeDir) + 21];
+    snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
+
     char volumeBuf[8];
     FILE *settingsFile;
 
-    settingsFile = fopen("audioRename.txt", "r");
+    settingsFile = fopen(dirBuf, "r");
     if (settingsFile == NULL)
     {
-        settingsFile = fopen("audioRename.txt", "w");
+        settingsFile = fopen(dirBuf, "w");
         printf("please enter volume (0.0 -> 1.0)\n");
         scanf("%f", &volume);
         sprintf(volumeBuf, "%f", volume);
