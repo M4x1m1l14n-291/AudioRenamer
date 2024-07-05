@@ -1,8 +1,7 @@
-#include "playMusic.h"
-
 void play(char const *name);
 void playDir(char const *dir);
-void playCurrDir();
+void playSelectedDir();
 
-void readSettings();
+void scanDirectory(char const *path);
+void readVolume();
 void printHelp();

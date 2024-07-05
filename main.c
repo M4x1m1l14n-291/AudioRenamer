@@ -6,19 +6,24 @@
 #include <unistd.h>
 #include <utils.h>
 #include <signal.h>
+#include <dirent.h>
 
 #include "main.h"
+#include "linkedList.h"
+#include "playMusic.h"
 
 float volume = 1.0;
-char selectedDir[256] = "./";
+char selectedDir[256] = ".";
+
+struct ListNode *Files;
 
 int main(int argc, char const *argv[])
 {
-    readSettings();
+    readVolume();
 
     if (argc == 1)
     {
-        playCurrDir();
+        playSelectedDir();
     }
     else if (argc == 2 && !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))
     {
@@ -67,19 +72,46 @@ void play(char const *name)
     exit(0);
 }
 
-void playCurrDir()
+void playSelectedDir()
 {
-    playDir("./");
+    playDir(selectedDir);
 }
 
 void playDir(char const *dir)
 {
-    printf("WIP: scan directory: %s\n", dir);
 
+    scanDirectory(dir);
     exit(0);
 }
 
-void readSettings()
+void scanDirectory(char const *path)
+{
+    printf("scanning directory %s\n\n", path);
+
+    Files = malloc(sizeof(struct ListNode));
+    strcpy(Files->name, "..");
+    Files->next = NULL;
+
+    struct dirent *entry;
+    DIR *dir = opendir(path);
+    if (dir == NULL)
+    {
+        return;
+    }
+
+    while ((entry = readdir(dir)) != NULL)
+    {
+        if (entry->d_name[0] == '.')
+            continue;
+
+        appendNode(Files, entry->d_name);
+    }
+
+    printList(Files);
+    closedir(dir);
+}
+
+void readVolume()
 {
     char volumeBuf[8];
     FILE *settingsFile;
@@ -92,13 +124,10 @@ void readSettings()
         scanf("%f", &volume);
         sprintf(volumeBuf, "%f", volume);
         fprintf(settingsFile, volumeBuf);
-        fprintf(settingsFile, selectedDir);
     }
     else
-    {
         fgets(volumeBuf, 8, settingsFile);
-        fgets(selectedDir, 255, settingsFile);
-    }
+
     volume = strtof(volumeBuf, NULL);
 
     fclose(settingsFile);
