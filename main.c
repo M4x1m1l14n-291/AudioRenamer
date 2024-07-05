@@ -1,92 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <unistd.h>
+#include <utils.h>
+#include <signal.h>
+
 #include "main.h"
 
 float volume = 1.0;
-char input[512];
+char selectedDir[256] = "./";
 
 int main(int argc, char const *argv[])
 {
-    readVolume();
+    readSettings();
 
     if (argc == 1)
     {
-        playMusicCurrDir();
+        playCurrDir();
+    }
+    else if (argc == 2 && !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))
+    {
+        printHelp();
     }
     else if (argc == 2)
     {
-        playMusic(argv);
+        play(argv[1]);
     }
     else if (argc == 3 && !strcmp(argv[1], "--directory") || !strcmp(argv[1], "-d"))
     {
-        playMusicDir();
+        playDir(argv[2]);
+    }
+    else
+    {
+        printHelp();
     }
 }
 
-void playMusic(char const *argv[])
+void play(char const *name)
 {
-    printf("start playing: %s\n", argv[1]);
+    char input[512];
+
+    printf("start playing: %s\n", name);
     pid_t soundPid = fork();
     if (soundPid < 0)
     {
-        perror("forking error");
-        exit(1);
+        perror("forking error, trying again");
+        play(name);
     }
     else if (soundPid == 0)
     {
-        playSound(argv[1]);
+        playMusic(name, volume);
     }
 
-    printf("quit ('q')\n");
+    printf("stop ('s')\n");
     scanf("%s", &input);
 
-    if (!strcmp(input, "q") || !strcmp(input, "quit"))
+    if (!strcmp(input, "s") || !strcmp(input, "stop"))
     {
         kill(soundPid, SIGKILL);
     }
 
     waitpid(soundPid, NULL, 0);
+
     exit(0);
 }
 
-void playMusicCurrDir()
+void playCurrDir()
 {
-    printf("WIP :scan current directory\n");
+    playDir("./");
+}
+
+void playDir(char const *dir)
+{
+    printf("WIP: scan directory: %s\n", dir);
+
     exit(0);
 }
 
-void playMusicDir()
+void readSettings()
 {
-    printf("WIP: scan directory\n");
-    exit(0);
-}
+    char volumeBuf[8];
+    FILE *settingsFile;
 
-void playSound(char const *path)
-{
-    char vol[32];
-    snprintf(vol, sizeof(vol), "volume=%f", volume);
-
-    execlp("/bin/ffplay", "ffplay", "-v", "0", "-nodisp", "-autoexit", "-af", vol, path, NULL);
-    exit(0);
-}
-
-void readVolume()
-{
-    char buf[8];
-    FILE *volumeFile;
-
-    volumeFile = fopen("audioRename.txt", "r");
-    if (volumeFile == NULL)
+    settingsFile = fopen("audioRename.txt", "r");
+    if (settingsFile == NULL)
     {
-        volumeFile = fopen("audioRename.txt", "w");
+        settingsFile = fopen("audioRename.txt", "w");
         printf("please enter volume (0.0 -> 1.0)\n");
         scanf("%f", &volume);
-        sprintf(buf, "%f", volume);
-        fprintf(volumeFile, buf);
+        sprintf(volumeBuf, "%f", volume);
+        fprintf(settingsFile, volumeBuf);
+        fprintf(settingsFile, selectedDir);
     }
     else
     {
-        fgets(buf, 8, volumeFile);
+        fgets(volumeBuf, 8, settingsFile);
+        fgets(selectedDir, 255, settingsFile);
     }
-    fclose(volumeFile);
+    volume = strtof(volumeBuf, NULL);
 
-    volume = strtof(buf, NULL);
+    fclose(settingsFile);
+}
+
+void printHelp()
+{
+    printf("AUDIO RENAMER\n"
+           "help…\n");
 }

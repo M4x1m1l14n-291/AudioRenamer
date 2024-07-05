@@ -1,15 +1,8 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <unistd.h>
-#include <utils.h>
-#include <signal.h>
+#include "playMusic.h"
 
-void playSound(char const *path);
-void readVolume();
-void playMusicCurrDir();
-void playMusicDir();
-void playMusic();
+void play(char const *name);
+void playDir(char const *dir);
+void playCurrDir();
+
+void readSettings();
+void printHelp();
