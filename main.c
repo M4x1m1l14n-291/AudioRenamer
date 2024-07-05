@@ -23,25 +23,9 @@ int main(int argc, char const *argv[])
     readVolume();
 
     if (argc == 1)
-    {
-        playSelectedDir();
-    }
-    else if (argc == 2 && !strcmp(argv[1], "--help") || !strcmp(argv[1], "-h"))
-    {
-        printHelp();
-    }
-    else if (argc == 2)
-    {
-        play(argv[1]);
-    }
-    else if (argc == 3 && !strcmp(argv[1], "--directory") || !strcmp(argv[1], "-d"))
-    {
-        playDir(argv[2]);
-    }
+        playDir(selectedDir);
     else
-    {
         printHelp();
-    }
 }
 
 void play(char const *name)
@@ -72,11 +56,6 @@ void play(char const *name)
     }
 
     waitpid(soundPid, NULL, 0);
-}
-
-void playSelectedDir()
-{
-    playDir(selectedDir);
 }
 
 void playDir(char const *dir)
