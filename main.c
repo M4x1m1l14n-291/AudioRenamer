@@ -107,7 +107,7 @@ void scanDirectory(char const *path)
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (entry->d_name[0] == '.' || !isAudioFile(entry->d_name))
+        if (entry->d_name[0] == '.' || entry->d_type == 4 || !isAudioFile(entry->d_name))
             continue;
 
         appendNode(Files, entry->d_name);
