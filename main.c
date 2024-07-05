@@ -7,6 +7,7 @@
 #include <utils.h>
 #include <signal.h>
 #include <dirent.h>
+#include <stdbool.h>
 
 #include "main.h"
 #include "linkedList.h"
@@ -47,6 +48,9 @@ void play(char const *name)
 {
     char input[512];
 
+    if (name[0] == '.')
+        return;
+
     printf("start playing: %s\n", name);
     pid_t soundPid = fork();
     if (soundPid < 0)
@@ -68,8 +72,6 @@ void play(char const *name)
     }
 
     waitpid(soundPid, NULL, 0);
-
-    exit(0);
 }
 
 void playSelectedDir()
@@ -79,8 +81,13 @@ void playSelectedDir()
 
 void playDir(char const *dir)
 {
-
     scanDirectory(dir);
+
+    struct ListNode *item = Files;
+
+    for (; item; item = item->next)
+        play(item->name);
+
     exit(0);
 }
 
@@ -95,13 +102,11 @@ void scanDirectory(char const *path)
     struct dirent *entry;
     DIR *dir = opendir(path);
     if (dir == NULL)
-    {
         return;
-    }
 
     while ((entry = readdir(dir)) != NULL)
     {
-        if (entry->d_name[0] == '.')
+        if (entry->d_name[0] == '.' || !isAudioFile(entry->d_name))
             continue;
 
         appendNode(Files, entry->d_name);
@@ -109,6 +114,21 @@ void scanDirectory(char const *path)
 
     printList(Files);
     closedir(dir);
+}
+
+// Check if filename ends with m4a or mp3
+int isAudioFile(char *name)
+{
+    int len = strlen(name);
+    if (len < 5)
+        return false;
+
+    if (!strncmp(name + len - 4, ".mp3", 4))
+        return true;
+    if (!strncmp(name + len - 4, ".m4a", 4))
+        return true;
+
+    return false;
 }
 
 void readVolume()
