@@ -16,12 +16,16 @@
 struct settings Settings = {1.0f, "", ""};
 struct ListNode *Files;
 
+FILE *settingsFile;
+
 int main()
 {
     readSettings();
     printStart();
 
-    // playDir(Settings.directory);
+    playDir(".");
+
+    fclose(settingsFile);
 }
 
 void play(char const *filename)
@@ -114,35 +118,36 @@ void readSettings()
     char dirBuf[strlen(homeDir) + 22];
     snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
 
-    FILE *settingsFile;
-    settingsFile = fopen(dirBuf, "r");
-    if (settingsFile == NULL)
-        createSettingsFile(settingsFile, dirBuf);
+    if ((settingsFile = fopen(dirBuf, "r")) == NULL)
+        createSettingsFile(dirBuf);
     else
-    {
-        fread(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
-        fread(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
-        fread(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
-
-        fclose(settingsFile);
-    }
+        loadSettings();
 }
 
-void createSettingsFile(FILE *settingsFile, char *dirBuf)
+void createSettingsFile(char *dirBuf)
 {
     settingsFile = fopen(dirBuf, "w");
     printf("please enter volume (0.0 -> 1.0)\n");
     scanf("%f", &Settings.volume);
 
+    saveSettings();
+}
+
+void saveSettings()
+{
     fwrite(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
     fwrite(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
     fwrite(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
+}
 
-    fclose(settingsFile);
+void loadSettings()
+{
+    fread(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
+    fread(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
+    fread(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
 }
 
 void printStart()
 {
-    printf("AUDIO RENAMER\n"
-           "help\n");
+    printf("AUDIO RENAMER\n");
 }

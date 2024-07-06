@@ -18,6 +18,9 @@ int isAudioFile(char *filename);
 void readSettings();
 
 // Create settings file in user config directory
-void createSettingsFile(FILE *settingsFile, char *dirBuf);
+void createSettingsFile(char *dirBuf);
+
+void saveSettings();
+void loadSettings();
 
 void printStart();
