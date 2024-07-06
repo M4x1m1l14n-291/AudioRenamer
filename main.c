@@ -130,7 +130,7 @@ void readVolume()
         printf("please enter volume (0.0 -> 1.0)\n");
         scanf("%f", &volume);
 
-        sprintf(volumeBuf, "%f", volume);
+        sprintf(volumeBuf, "%.2f", volume);
         fprintf(settingsFile, volumeBuf);
     }
     else
