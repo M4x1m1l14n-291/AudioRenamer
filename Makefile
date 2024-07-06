@@ -23,4 +23,5 @@ run:
 	./$(NAME)
 
 clean:
-	rm $(NAME)
+	rm -f $(NAME)
+# rm -f /home/maximilian/.config/audioRename

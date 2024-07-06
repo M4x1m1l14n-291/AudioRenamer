@@ -13,37 +13,34 @@
 #include "linkedList.h"
 #include "playMusic.h"
 
-float volume = 1.0;
-char selectedDir[256] = ".";
-
+struct settings Settings = {1.0f, "", ""};
 struct ListNode *Files;
 
 int main()
 {
-    readVolume();
+    readSettings();
+    printStart();
 
-    printHelp();
-
-    playDir(selectedDir);
+    // playDir(Settings.directory);
 }
 
-void play(char const *name)
+void play(char const *filename)
 {
     char *input = malloc(512);
 
-    if (name[0] == '.')
+    if (filename[0] == '.')
         return;
 
-    printf("start playing: %s\n", name);
+    printf("start playing: %s\n", filename);
     pid_t soundPid = fork();
     if (soundPid < 0)
     {
         perror("forking error, trying again");
-        play(name);
+        play(filename);
     }
     else if (soundPid == 0)
     {
-        playMusic(name, volume);
+        playMusic(filename, Settings.volume);
     }
 
     printf("stop ('s')\n");
@@ -69,7 +66,6 @@ void playDir(char const *dir)
     exit(0);
 }
 
-// Scan the 'path' directory
 void scanDirectory(char const *path)
 {
     printf("scanning directory %s\n\n", path);
@@ -95,54 +91,58 @@ void scanDirectory(char const *path)
     closedir(dir);
 }
 
-// Check if filename ends with m4a or mp3
-int isAudioFile(char *name)
+int isAudioFile(char *filename)
 {
-    int len = strlen(name);
+    int len = strlen(filename);
     if (len < 5)
         return false;
 
-    if (!strncmp(name + len - 4, ".mp3", 4))
+    if (!strncmp(filename + len - 4, ".mp3", 4))
         return true;
-    if (!strncmp(name + len - 4, ".m4a", 4))
+    if (!strncmp(filename + len - 4, ".m4a", 4))
         return true;
 
     return false;
 }
 
-// Read audio volume from config file
-void readVolume()
+void readSettings()
 {
     char *homeDir = getenv("HOME");
     if (homeDir == NULL)
         return;
 
-    char dirBuf[strlen(homeDir) + 21];
+    char dirBuf[strlen(homeDir) + 22];
     snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
 
-    char volumeBuf[8];
     FILE *settingsFile;
-
     settingsFile = fopen(dirBuf, "r");
     if (settingsFile == NULL)
-    {
-        settingsFile = fopen(dirBuf, "w");
-        printf("please enter volume (0.0 -> 1.0)\n");
-        scanf("%f", &volume);
-
-        sprintf(volumeBuf, "%.2f", volume);
-        fprintf(settingsFile, volumeBuf);
-    }
+        createSettingsFile(settingsFile, dirBuf);
     else
-        fgets(volumeBuf, 8, settingsFile);
+    {
+        fread(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
+        fread(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
+        fread(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
 
-    volume = strtof(volumeBuf, NULL);
+        fclose(settingsFile);
+    }
+}
+
+void createSettingsFile(FILE *settingsFile, char *dirBuf)
+{
+    settingsFile = fopen(dirBuf, "w");
+    printf("please enter volume (0.0 -> 1.0)\n");
+    scanf("%f", &Settings.volume);
+
+    fwrite(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
+    fwrite(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
+    fwrite(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
 
     fclose(settingsFile);
 }
 
-void printHelp()
+void printStart()
 {
     printf("AUDIO RENAMER\n"
-           "help…\n");
+           "help\n");
 }
