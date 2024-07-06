@@ -18,19 +18,18 @@ char selectedDir[256] = ".";
 
 struct ListNode *Files;
 
-int main(int argc, char const *argv[])
+int main()
 {
     readVolume();
 
-    if (argc == 1)
-        playDir(selectedDir);
-    else
-        printHelp();
+    printHelp();
+
+    playDir(selectedDir);
 }
 
 void play(char const *name)
 {
-    char input[512];
+    char *input = malloc(512);
 
     if (name[0] == '.')
         return;
@@ -48,7 +47,7 @@ void play(char const *name)
     }
 
     printf("stop ('s')\n");
-    scanf("%s", &input);
+    scanf("%s", input);
 
     if (!strcmp(input, "s") || !strcmp(input, "stop"))
     {
@@ -130,6 +129,7 @@ void readVolume()
         settingsFile = fopen(dirBuf, "w");
         printf("please enter volume (0.0 -> 1.0)\n");
         scanf("%f", &volume);
+
         sprintf(volumeBuf, "%f", volume);
         fprintf(settingsFile, volumeBuf);
     }
