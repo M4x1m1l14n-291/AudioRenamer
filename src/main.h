@@ -15,10 +15,7 @@ void scanDirectory(char const *path);
 int isAudioFile(char *filename);
 
 // Read settings from config file
-void readSettings();
+void readSettings(char *dirBuf);
 
-// Create settings file in user config directory
-void createSettingsFile(char *dirBuf);
-
-void saveSettings();
+void saveSettings(char *dirBuf);
 void loadSettings();

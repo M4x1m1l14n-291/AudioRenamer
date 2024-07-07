@@ -19,7 +19,17 @@ int running = 1;
 
 int main()
 {
-    readSettings();
+    char *homeDir = getenv("HOME");
+    if (homeDir == NULL)
+    {
+        printf("$HOME environment variable not set\n");
+        exit(1);
+    }
+
+    char dirBuf[strlen(homeDir) + 22];
+    snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
+
+    readSettings(dirBuf);
 
     while (running)
     {
@@ -40,55 +50,54 @@ int main()
 
         scanf("%s", inp);
 
-        if (!strcmp(inp, "v"))
+        if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
         {
             printf("enter volume (0.0 -> 1.0): ", Settings.volume);
             scanf("%f", &Settings.volume);
-            saveSettings();
         }
-        else if (!strcmp(inp, "d"))
+        else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
         {
             printf("enter full path to music directory: ", Settings.directory);
             scanf("%s", &Settings.directory);
             int len = strlen(Settings.directory);
-            if (Settings.directory[len - 1] != '/')
+            if (Settings.directory[len - 1] != '/' && len < 255)
             {
                 Settings.directory[len] = '/';
                 Settings.directory[len + 1] = '\0';
             }
-
-            saveSettings();
+            else if (len >= 255)
+            {
+                perror("path too long!");
+                exit(1);
+            }
         }
-        else if (!strcmp(inp, "p"))
+        else if (!strcmp(inp, "play") || !strcmp(inp, "p"))
             playDir();
         else if (!strcmp(inp, "quit") || !strcmp(inp, "q"))
             running = 0;
+        saveSettings(dirBuf);
     }
-
-    fclose(settingsFile);
 }
 
-void play(char const *filename)
+void play(char const *filename, unsigned int retries)
 {
-    if (filename[0] == '.')
-        return;
-
     pid_t soundPid = fork();
     if (soundPid < 0)
     {
         perror("forking error, trying again");
-        play(filename);
+        if (retries > 5)
+            exit(1);
+
+        play(filename, retries + 1);
     }
     else if (soundPid == 0)
-    {
         playMusic(filename, Settings.volume);
-    }
 
-    char inp;
+    char inp[256];
     printf("stop (s):\n");
     scanf("%s", inp);
 
-    if (inp == 's')
+    if (!strcmp(inp, "s") || !strcmp(inp, "stop"))
         kill(soundPid, SIGKILL);
 
     waitpid(soundPid, NULL, 0);
@@ -106,7 +115,7 @@ void playDir()
         sprintf(pathAndName, "%s%s", Settings.directory, item->name);
         printf("playing: %s\n", item->name);
 
-        play(pathAndName);
+        play(pathAndName, 0);
     }
 
     exit(0);
@@ -150,38 +159,23 @@ int isAudioFile(char *filename)
     return 0;
 }
 
-void readSettings()
+void readSettings(char *dirBuf)
 {
-    char *homeDir = getenv("HOME");
-    if (homeDir == NULL)
-    {
-        printf("$HOME environment variable not set\n");
-        exit(1);
-    }
-
-    char dirBuf[strlen(homeDir) + 22];
-    snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
-
-    if ((settingsFile = fopen(dirBuf, "r")) == NULL)
-        createSettingsFile(dirBuf);
+    if ((settingsFile = fopen(dirBuf, "rb")) == NULL)
+        saveSettings(dirBuf);
     else
         loadSettings();
-
-    fclose(settingsFile);
-    settingsFile = fopen(dirBuf, "w");
 }
 
-void createSettingsFile(char *dirBuf)
+void saveSettings(char *dirBuf)
 {
-    settingsFile = fopen(dirBuf, "w");
-    saveSettings();
-}
+    settingsFile = fopen(dirBuf, "w+b");
 
-void saveSettings()
-{
     fwrite(&Settings.volume, 4, 1, settingsFile);
     fwrite(&Settings.directory, 256, 1, settingsFile);
     fwrite(&Settings.lastPlayedSong, 256, 1, settingsFile);
+
+    fclose(settingsFile);
 }
 
 void loadSettings()
@@ -189,4 +183,6 @@ void loadSettings()
     fread(&Settings.volume, 4, 1, settingsFile);
     fread(&Settings.directory, 256, 1, settingsFile);
     fread(&Settings.lastPlayedSong, 256, 1, settingsFile);
+
+    fclose(settingsFile);
 }
