@@ -22,8 +22,11 @@ void appendNode(struct ListNode *list, char *name)
     node->prev = list;
 }
 
-void removeNode(ListNode *node)
+void switchNodes(ListNode *node1, ListNode *node2)
 {
+    char temp[] = node1->name;
+    strcpy(node1->name, node2->name);
+    strcpy(node2->name, temp);
 }
 
 void printList(struct ListNode *list)
