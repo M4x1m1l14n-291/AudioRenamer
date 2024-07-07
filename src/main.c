@@ -7,13 +7,14 @@
 #include <utils.h>
 #include <signal.h>
 #include <dirent.h>
-#include <stdbool.h>
+
+#include <ctype.h>
 
 #include "main.h"
 #include "linkedList.h"
 #include "playMusic.h"
 
-struct settings Settings = {1.0f, "", ""};
+struct settings Settings = {1.0f, ".", ""};
 struct ListNode *Files;
 
 FILE *settingsFile;
@@ -23,7 +24,7 @@ int main()
     readSettings();
     printStart();
 
-    playDir(".");
+    playDir(Settings.directory);
 
     fclose(settingsFile);
 }
@@ -72,16 +73,15 @@ void playDir(char const *dir)
 
 void scanDirectory(char const *path)
 {
-    printf("scanning directory %s\n\n", path);
-
     Files = malloc(sizeof(struct ListNode));
-    strcpy(Files->name, "..");
-    Files->next = NULL;
 
     struct dirent *entry;
     DIR *dir = opendir(path);
     if (dir == NULL)
+    {
+        perror("error opening path");
         return;
+    }
 
     while ((entry = readdir(dir)) != NULL)
     {
@@ -99,14 +99,14 @@ int isAudioFile(char *filename)
 {
     int len = strlen(filename);
     if (len < 5)
-        return false;
+        return 0;
 
     if (!strncmp(filename + len - 4, ".mp3", 4))
-        return true;
+        return 1;
     if (!strncmp(filename + len - 4, ".m4a", 4))
-        return true;
+        return 1;
 
-    return false;
+    return 0;
 }
 
 void readSettings()

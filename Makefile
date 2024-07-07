@@ -2,10 +2,10 @@
 CC := gcc
 
 # compiler flags
-CFLAGS := -g -Wall -Werror -Wextra
+CFLAGS := -Wall -Werror -Wextra
 
 # files to include
-FILES := main.c playMusic.c linkedList.c
+FILES := src/main.c src/playMusic.c src/linkedList.c
 
 # executable name
 NAME := AudioRenamer
@@ -17,11 +17,11 @@ build:
 	$(CC) $(FILES) -o $(NAME)
 
 debug:
-	$(CC) $(CFLAGS) $(FILES) -o $(NAME)
+	$(CC) -g $(CFLAGS) $(FILES) -o $(NAME)
 
 run:
 	./$(NAME)
 
 clean:
 	rm -f $(NAME)
-# rm -f /home/maximilian/.config/audioRename
+#	rm -f /home/maximilian/.config/audioRename

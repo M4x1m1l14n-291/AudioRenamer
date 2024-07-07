@@ -6,15 +6,20 @@
 
 void appendNode(struct ListNode *list, char *name)
 {
-    struct ListNode *node = malloc(sizeof(struct ListNode));
+    if (strlen(list->name) == 0)
+    {
+        strcpy(list->name, name);
+        return;
+    }
 
+    struct ListNode *node = malloc(sizeof(struct ListNode));
     strcpy(node->name, name);
-    node->next = NULL;
 
     for (; list->next != NULL; list = list->next)
         ;
 
     list->next = node;
+    node->prev = list;
 }
 
 void removeNode(ListNode *node)
