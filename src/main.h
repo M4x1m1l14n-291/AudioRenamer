@@ -6,7 +6,7 @@ struct settings
 };
 
 void play(char const *filename);
-void playDir(char const *dir);
+void playDir();
 
 // Scan the 'path' directory
 void scanDirectory(char const *path);
@@ -22,5 +22,3 @@ void createSettingsFile(char *dirBuf);
 
 void saveSettings();
 void loadSettings();
-
-void printStart();

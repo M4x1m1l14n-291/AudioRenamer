@@ -10,29 +10,61 @@
 #include "linkedList.h"
 #include "playMusic.h"
 
-struct settings Settings = {1.0f, ".", ""};
+struct settings Settings = {1.0f, "", ""};
 struct ListNode *Files;
 
 FILE *settingsFile;
 
+int running = 1;
+
 int main()
 {
     readSettings();
-    printStart();
+    printf("AUDIO RENAMER\n");
 
-    playDir(Settings.directory);
+    while (running)
+    {
+        char inp[256];
+
+        printf("change volume           (v):\n"
+               "set or change directory (d):\n");
+        if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
+            printf("play saved song (p):\n");
+        else
+            printf("start playing           (p):\n");
+
+        scanf("%s", inp);
+
+        if (!strcmp(inp, "v"))
+        {
+            printf("volume=%.2f\n"
+                   "enter volume (0.0 -> 1.0):\n",
+                   Settings.volume);
+            scanf("%f", Settings.volume);
+            saveSettings();
+        }
+        else if (!strcmp(inp, "d"))
+        {
+            printf("directory=%s\n"
+                   "enter directory:\n",
+                   Settings.directory);
+            scanf("%s", Settings.directory);
+            saveSettings();
+        }
+        else if (!strcmp(inp, "p"))
+        {
+            playDir();
+        }
+    }
 
     fclose(settingsFile);
 }
 
 void play(char const *filename)
 {
-    char *input = malloc(512);
-
     if (filename[0] == '.')
         return;
 
-    printf("start playing: %s\n", filename);
     pid_t soundPid = fork();
     if (soundPid < 0)
     {
@@ -44,25 +76,30 @@ void play(char const *filename)
         playMusic(filename, Settings.volume);
     }
 
-    printf("stop ('s')\n");
-    scanf("%s", input);
+    char inp;
+    printf("stop (s):\n");
+    scanf("%s", inp);
 
-    if (!strcmp(input, "s") || !strcmp(input, "stop"))
-    {
+    if (inp == 's')
         kill(soundPid, SIGKILL);
-    }
 
     waitpid(soundPid, NULL, 0);
 }
 
-void playDir(char const *dir)
+void playDir()
 {
-    scanDirectory(dir);
+    scanDirectory(Settings.directory);
 
     struct ListNode *item = Files;
 
     for (; item; item = item->next)
-        play(item->name);
+    {
+        char pathAndName[512];
+        sprintf(pathAndName, "%s%s", Settings.directory, item->name);
+        printf("playing: %s\n", item->name);
+
+        play(pathAndName);
+    }
 
     exit(0);
 }
@@ -123,9 +160,6 @@ void readSettings()
 void createSettingsFile(char *dirBuf)
 {
     settingsFile = fopen(dirBuf, "w");
-    printf("please enter volume (0.0 -> 1.0)\n");
-    scanf("%f", &Settings.volume);
-
     saveSettings();
 }
 
@@ -141,9 +175,4 @@ void loadSettings()
     fread(&Settings.volume, 1, sizeof(Settings.volume), settingsFile);
     fread(&Settings.directory, 1, sizeof(Settings.directory), settingsFile);
     fread(&Settings.lastPlayedSong, 1, sizeof(Settings.lastPlayedSong), settingsFile);
-}
-
-void printStart()
-{
-    printf("AUDIO RENAMER\n");
 }
