@@ -24,7 +24,8 @@ void appendNode(struct ListNode *list, char *name)
 
 void switchNodes(ListNode *node1, ListNode *node2)
 {
-    char temp[] = node1->name;
+    char temp[256];
+    strcpy(temp, node1->name);
     strcpy(node1->name, node2->name);
     strcpy(node2->name, temp);
 }
