@@ -15,6 +15,8 @@ struct ListNode *Files;
 
 FILE *settingsFile;
 
+char dirBuf[256];
+
 int running = 1;
 
 int main()
@@ -26,7 +28,6 @@ int main()
         exit(1);
     }
 
-    char dirBuf[strlen(homeDir) + 22];
     snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
 
     readSettings(dirBuf);
@@ -94,17 +95,25 @@ void play(char const *filename, unsigned int retries)
         playMusic(filename, Settings.volume);
 
     char inp[256];
-    printf("stop (s):\n");
+    printf("next (n):\n"
+           "quit (q):\n> ");
     scanf("%s", inp);
 
-    if (!strcmp(inp, "s") || !strcmp(inp, "stop"))
+    if (!strcmp(inp, "n") || !strcmp(inp, "next"))
         kill(soundPid, SIGKILL);
+    if (!strcmp(inp, "q") || !strcmp(inp, "quit"))
+    {
+        kill(soundPid, SIGKILL);
+        waitpid(soundPid, NULL, 0);
+        exit(0);
+    }
 
     waitpid(soundPid, NULL, 0);
 }
 
 void playDir()
 {
+    system("@cls||clear");
     scanDirectory(Settings.directory);
 
     struct ListNode *item = Files;
@@ -117,8 +126,6 @@ void playDir()
 
         play(pathAndName, 0);
     }
-
-    exit(0);
 }
 
 void scanDirectory(char const *path)
