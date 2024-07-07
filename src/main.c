@@ -39,12 +39,17 @@ int main()
         system("@cls||clear");
         printf("AUDIO RENAMER\n\n");
 
-        printf("volume=%.2f\ndirectory=%s\nlast played song=%s\n\n", Settings.volume, Settings.directory, Settings.lastPlayedSong);
+        printf("volume=%.2f\n"
+               "directory=%s\n"
+               "last played song=%s\n\n",
+               Settings.volume,
+               Settings.directory,
+               Settings.lastPlayedSong);
 
         printf("change volume           (v):\n"
                "set or change directory (d):\n");
         if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
-            printf("continue playing songs (p):\n");
+            printf("continue playing songs  (p):\n");
         else
             printf("start playing           (p):\n");
         printf("quit                    (q):\n> ");
@@ -124,6 +129,8 @@ void playDir()
         sprintf(pathAndName, "%s%s", Settings.directory, item->name);
         printf("playing: %s\n", item->name);
 
+        strcpy(Settings.lastPlayedSong, item->name);
+        saveSettings();
         play(pathAndName, 0);
     }
 }
@@ -166,7 +173,7 @@ int isAudioFile(char *filename)
     return 0;
 }
 
-void readSettings(char *dirBuf)
+void readSettings()
 {
     if ((settingsFile = fopen(dirBuf, "rb")) == NULL)
         saveSettings(dirBuf);
@@ -174,7 +181,7 @@ void readSettings(char *dirBuf)
         loadSettings();
 }
 
-void saveSettings(char *dirBuf)
+void saveSettings()
 {
     settingsFile = fopen(dirBuf, "w+b");
 
