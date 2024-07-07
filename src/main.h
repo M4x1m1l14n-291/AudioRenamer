@@ -5,7 +5,7 @@ struct settings
     char lastPlayedSong[256];
 };
 
-void play(char const *filename, unsigned int retries);
+void play(char const *filename, char *name, unsigned int retries);
 void playDir();
 
 // Scan the 'path' directory

@@ -18,6 +18,7 @@ FILE *settingsFile;
 char dirBuf[256];
 
 int running = 1;
+int playing = 1;
 
 int main()
 {
@@ -32,10 +33,10 @@ int main()
 
     readSettings(dirBuf);
 
+    char inp[256];
+
     while (running)
     {
-        char inp[256];
-
         system("@cls||clear");
         printf("AUDIO RENAMER\n\n");
 
@@ -58,13 +59,14 @@ int main()
 
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
         {
-            printf("enter volume (0.0 -> 1.0): ", Settings.volume);
+            printf("enter volume (0.0 -> 1.0): ");
             scanf("%f", &Settings.volume);
         }
         else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
         {
-            printf("enter full path to music directory: ", Settings.directory);
-            scanf("%s", &Settings.directory);
+            printf("enter full path to music directory: ");
+            scanf("%s", Settings.directory);
+
             int len = strlen(Settings.directory);
             if (Settings.directory[len - 1] != '/' && len < 255)
             {
@@ -85,7 +87,7 @@ int main()
     }
 }
 
-void play(char const *filename, unsigned int retries)
+void play(char const *filename, char *name, unsigned int retries)
 {
     pid_t soundPid = fork();
     if (soundPid < 0)
@@ -94,24 +96,37 @@ void play(char const *filename, unsigned int retries)
         if (retries > 5)
             exit(1);
 
-        play(filename, retries + 1);
+        play(filename, name, retries + 1);
     }
     else if (soundPid == 0)
         playMusic(filename, Settings.volume);
 
     char inp[256];
-    printf("next (n):\n"
+
+start:
+    system("@cls||clear");
+    printf("playing : %s\n\n", name);
+    printf("stop (s):\n"
+           "next (n):\n"
            "quit (q):\n> ");
     scanf("%s", inp);
 
-    if (!strcmp(inp, "n") || !strcmp(inp, "next"))
+    if (!strcmp(inp, "s") || !strcmp(inp, "stop"))
+    {
         kill(soundPid, SIGKILL);
-    if (!strcmp(inp, "q") || !strcmp(inp, "quit"))
+        playing = 0;
+        return;
+    }
+    else if (!strcmp(inp, "n") || !strcmp(inp, "next"))
+        kill(soundPid, SIGKILL);
+    else if (!strcmp(inp, "q") || !strcmp(inp, "quit"))
     {
         kill(soundPid, SIGKILL);
         waitpid(soundPid, NULL, 0);
         exit(0);
     }
+    else
+        goto start;
 
     waitpid(soundPid, NULL, 0);
 }
@@ -123,16 +138,16 @@ void playDir()
 
     struct ListNode *item = Files;
 
-    for (; item; item = item->next)
+    for (; item && playing; item = item->next)
     {
         char pathAndName[512];
         sprintf(pathAndName, "%s%s", Settings.directory, item->name);
-        printf("playing: %s\n", item->name);
 
         strcpy(Settings.lastPlayedSong, item->name);
         saveSettings();
-        play(pathAndName, 0);
+        play(pathAndName, item->name, 0);
     }
+    playing = 1;
 }
 
 void scanDirectory(char const *path)
