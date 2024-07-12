@@ -22,6 +22,8 @@ int playing = 1;
 
 int main()
 {
+    char inp[256] = {0};
+
     char *homeDir = getenv("HOME");
     if (homeDir == NULL)
     {
@@ -30,10 +32,7 @@ int main()
     }
 
     snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
-
     readSettings(dirBuf);
-
-    char inp[256];
 
     while (running)
     {
@@ -53,9 +52,11 @@ int main()
             printf("continue playing songs  (p):\n");
         else
             printf("start playing           (p):\n");
-        printf("quit                    (q):\n> ");
+        printf("quit                    (q):\n"
+               "> ");
 
-        scanf("%s", inp);
+        fgets(inp, 256, stdin);
+        inp[strlen(inp) - 1] = '\0';
 
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
         {
@@ -65,18 +66,14 @@ int main()
         else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
         {
             printf("enter full path to music directory: ");
-            scanf("%s", Settings.directory);
-
+            fgets(Settings.directory, 255, stdin);
             int len = strlen(Settings.directory);
-            if (Settings.directory[len - 1] != '/' && len < 255)
+            Settings.directory[len-- - 1] = '\0';
+
+            if (Settings.directory[len - 1] != '/')
             {
                 Settings.directory[len] = '/';
                 Settings.directory[len + 1] = '\0';
-            }
-            else if (len >= 255)
-            {
-                perror("path too long!");
-                exit(1);
             }
         }
         else if (!strcmp(inp, "play") || !strcmp(inp, "p"))
@@ -108,8 +105,10 @@ start:
     printf("playing : %s\n\n", name);
     printf("stop (s):\n"
            "next (n):\n"
-           "quit (q):\n> ");
-    scanf("%s", inp);
+           "quit (q):\n"
+           "> ");
+    fgets(inp, 256, stdin);
+    inp[strlen(inp) - 1] = '\0';
 
     if (!strcmp(inp, "s") || !strcmp(inp, "stop"))
     {
