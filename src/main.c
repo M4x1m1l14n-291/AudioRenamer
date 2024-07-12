@@ -10,12 +10,18 @@
 #include "linkedList.h"
 #include "playMusic.h"
 
-struct settings Settings = {1.0f, "", ""};
+#define CLEAR //
+#if 1
+#define CLEAR system("@cls||clear");
+#endif
+
 struct ListNode *Files;
+struct settings Settings = {1.0f, "", ""};
 
 FILE *settingsFile;
 
 char dirBuf[256];
+char lastDir[256];
 
 int running = 1;
 int playing = 1;
@@ -30,13 +36,18 @@ int main()
         printf("$HOME environment variable not set\n");
         exit(1);
     }
+    else if (strlen(homeDir) > 256 - 23)
+    {
+        printf("$HOME environment variable to long\n");
+        exit(1);
+    }
 
     snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
     readSettings(dirBuf);
 
     while (running)
     {
-        system("@cls||clear");
+        CLEAR
         printf("AUDIO RENAMER\n\n");
 
         printf("volume=%.2f\n"
@@ -61,7 +72,8 @@ int main()
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
         {
             printf("enter volume (0.0 -> 1.0): ");
-            scanf("%f", &Settings.volume);
+            fgets(inp, 256, stdin);
+            Settings.volume = strtof(inp, NULL);
         }
         else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
         {
@@ -98,27 +110,27 @@ void play(char const *filename, char *name, unsigned int retries)
     else if (soundPid == 0)
         playMusic(filename, Settings.volume);
 
-    char inp[256];
+    char input[256];
 
 start:
-    system("@cls||clear");
+    CLEAR
     printf("playing : %s\n\n", name);
     printf("stop (s):\n"
            "next (n):\n"
            "quit (q):\n"
            "> ");
-    fgets(inp, 256, stdin);
-    inp[strlen(inp) - 1] = '\0';
+    fgets(input, 256, stdin);
+    input[strlen(input) - 1] = '\0';
 
-    if (!strcmp(inp, "s") || !strcmp(inp, "stop"))
+    if (!strcmp(input, "s") || !strcmp(input, "stop"))
     {
         kill(soundPid, SIGKILL);
         playing = 0;
         return;
     }
-    else if (!strcmp(inp, "n") || !strcmp(inp, "next"))
+    else if (!strcmp(input, "n") || !strcmp(input, "next"))
         kill(soundPid, SIGKILL);
-    else if (!strcmp(inp, "q") || !strcmp(inp, "quit"))
+    else if (!strcmp(input, "q") || !strcmp(input, "quit"))
     {
         kill(soundPid, SIGKILL);
         waitpid(soundPid, NULL, 0);
@@ -132,8 +144,10 @@ start:
 
 void playDir()
 {
-    system("@cls||clear");
-    scanDirectory(Settings.directory);
+    CLEAR
+    if (strcmp(Settings.directory, lastDir))
+        scanDirectory(Settings.directory);
+    strcpy(lastDir, Settings.directory);
 
     struct ListNode *item = Files;
 
@@ -151,6 +165,9 @@ void playDir()
 
 void scanDirectory(char const *path)
 {
+    if (Files)
+        freeNodes(Files);
+
     Files = malloc(sizeof(struct ListNode));
 
     struct dirent *entry;
@@ -171,7 +188,7 @@ void scanDirectory(char const *path)
 
     sortListAlpha(Files);
 
-    printList(Files);
+    // printList(Files);
     closedir(dir);
 }
 
