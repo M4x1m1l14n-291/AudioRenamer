@@ -22,7 +22,7 @@ void appendNode(struct ListNode *list, char *name)
     node->prev = list;
 }
 
-void switchNodes(ListNode *node1, ListNode *node2)
+void swapNodes(ListNode *node1, ListNode *node2)
 {
     char temp[256];
     strcpy(temp, node1->name);
@@ -30,11 +30,28 @@ void switchNodes(ListNode *node1, ListNode *node2)
     strcpy(node2->name, temp);
 }
 
+void sortListAlpha(ListNode *list)
+{
+    ListNode *first = list;
+
+    int sorted = 0;
+
+    while (!sorted)
+    {
+        list = first;
+        sorted = 1;
+
+        for (; list->next != NULL; list = list->next)
+            if (strcmp(list->name, list->next->name) > 0)
+            {
+                swapNodes(list, list->next);
+                sorted = 0;
+            }
+    }
+}
+
 void printList(struct ListNode *list)
 {
-    if (list == NULL)
-        return;
-
     for (; list; list = list->next)
         printf("%s\n", list->name);
 }

@@ -170,7 +170,9 @@ void scanDirectory(char const *path)
         appendNode(Files, entry->d_name);
     }
 
-    // printList(Files);
+    sortListAlpha(Files);
+
+    printList(Files);
     closedir(dir);
 }
 

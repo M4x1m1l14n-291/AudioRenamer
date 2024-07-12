@@ -6,6 +6,8 @@ typedef struct ListNode
 } ListNode;
 
 void appendNode(struct ListNode *list, char *name);
-void switchNodes(ListNode *node1, ListNode *node2);
+void swapNodes(ListNode *node1, ListNode *node2);
+
+void sortListAlpha(ListNode *list);
 
 void printList(struct ListNode *list);
