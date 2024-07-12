@@ -16,12 +16,14 @@ all: clean build run
 build:
 	$(CC) $(FILES) -o $(NAME)
 
-debug:
+debug_build:
 	$(CC) -g $(CFLAGS) $(FILES) -o $(NAME)
+
+debug:
+	gdb $(NAME) -tui
 
 run:
 	./$(NAME)
 
 clean:
 	rm -f $(NAME)
-#	rm -f /home/maximilian/.config/audioRename
