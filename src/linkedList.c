@@ -50,6 +50,13 @@ void sortListAlpha(ListNode *list)
     }
 }
 
+void freeNodes(ListNode *node)
+{
+    if (node->next != NULL)
+        freeNodes(node->next);
+    free(node);
+}
+
 void printList(struct ListNode *list)
 {
     for (; list; list = list->next)

@@ -10,4 +10,6 @@ void swapNodes(ListNode *node1, ListNode *node2);
 
 void sortListAlpha(ListNode *list);
 
+void freeNodes(ListNode *node);
+
 void printList(struct ListNode *list);
