@@ -46,16 +46,15 @@ int main()
     while (running)
     {
         CLEAR
-        printf("AUDIO RENAMER\n\n");
-
-        printf("volume=%.2f\n"
+        printf("AUDIO RENAMER\n\n"
+               "volume=%.2f\n"
                "directory=%s\n"
                "last played song=%s\n\n",
+               "change volume           (v):\n"
+               "set or change directory (d):\n",
                Settings.volume,
                Settings.directory,
                Settings.lastPlayedSong);
-        printf("change volume           (v):\n"
-               "set or change directory (d):\n");
         if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
             printf("continue playing songs  (p):\n"
                    "restart from begining   (r):\n");
@@ -115,11 +114,13 @@ void play(char const *filename, char *name, unsigned int retries)
 
 start:
     CLEAR
-    printf("playing : %s\n\n", name);
-    printf("stop (s):\n"
+    printf("playing : %s\n\n"
+           "stop (s):\n"
            "next (n):\n"
+           "edit (e):\n"
            "quit (q):\n"
-           "> ");
+           "> ",
+           name);
     fgets(input, 256, stdin);
     input[strlen(input) - 1] = '\0';
 
@@ -136,6 +137,9 @@ start:
         kill(soundPid, SIGKILL);
         waitpid(soundPid, NULL, 0);
         exit(0);
+    }
+    else if (!strcmp(input, "e") || !strcmp(input, "edit"))
+    {
     }
     else
         goto start;
