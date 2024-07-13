@@ -10,10 +10,8 @@
 #include "linkedList.h"
 #include "playMusic.h"
 
-#define CLEAR //
-#if 1
+// #define CLEAR //
 #define CLEAR system("@cls||clear");
-#endif
 
 struct ListNode *Files;
 struct settings Settings = {1.0f, "", ""};
@@ -150,6 +148,11 @@ void playDir()
     strcpy(lastDir, Settings.directory);
 
     struct ListNode *item = Files;
+    struct ListNode *test = Files;
+
+    for (; test; test = test->next)
+        if (!strcmp(test->name, Settings.lastPlayedSong))
+            item = test;
 
     for (; item && playing; item = item->next)
     {
@@ -169,6 +172,9 @@ void scanDirectory(char const *path)
         freeNodes(Files);
 
     Files = malloc(sizeof(struct ListNode));
+    strcpy(Files->name, "");
+    Files->next = NULL;
+    Files->prev = NULL;
 
     struct dirent *entry;
     DIR *dir = opendir(path);

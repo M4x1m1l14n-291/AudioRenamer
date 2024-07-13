@@ -19,7 +19,7 @@ build:
 debug_build:
 	$(CC) -g $(CFLAGS) $(FILES) -o $(NAME)
 
-debug:
+debug: clean debug_build
 	gdb $(NAME) -tui
 
 run:

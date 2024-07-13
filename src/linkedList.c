@@ -41,12 +41,16 @@ void sortListAlpha(ListNode *list)
         list = first;
         sorted = 1;
 
-        for (; list->next != NULL; list = list->next)
+        while (list->next != NULL)
+        {
             if (strcmp(list->name, list->next->name) > 0)
             {
                 swapNodes(list, list->next);
                 sorted = 0;
             }
+
+            list = list->next;
+        }
     }
 }
 
