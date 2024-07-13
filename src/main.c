@@ -54,11 +54,11 @@ int main()
                Settings.volume,
                Settings.directory,
                Settings.lastPlayedSong);
-
         printf("change volume           (v):\n"
                "set or change directory (d):\n");
         if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
-            printf("continue playing songs  (p):\n");
+            printf("continue playing songs  (p):\n"
+                   "restart from begining   (r):\n");
         else
             printf("start playing           (p):\n");
         printf("quit                    (q):\n"
@@ -88,10 +88,13 @@ int main()
         }
         else if (!strcmp(inp, "play") || !strcmp(inp, "p"))
             playDir();
+        else if (!strcmp(inp, "reset") || !strcmp(inp, "r"))
+            strcpy(Settings.lastPlayedSong, "");
         else if (!strcmp(inp, "quit") || !strcmp(inp, "q"))
             running = 0;
         saveSettings(dirBuf);
     }
+    CLEAR
 }
 
 void play(char const *filename, char *name, unsigned int retries)
