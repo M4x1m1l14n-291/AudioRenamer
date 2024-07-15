@@ -29,49 +29,24 @@ int main()
     char inp[256] = {0};
 
     char *homeDir = getenv("HOME");
-    if (homeDir == NULL)
+    if (homeDir == NULL || strlen(homeDir) > 256 - 23)
+        printf("$HOME environment variable not set or $HOME environment variable to long\n");
+    else
     {
-        printf("$HOME environment variable not set\n");
-        exit(1);
+        snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
+        readSettings(dirBuf);
     }
-    else if (strlen(homeDir) > 256 - 23)
-    {
-        printf("$HOME environment variable to long\n");
-        exit(1);
-    }
-
-    snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
-    readSettings(dirBuf);
 
     while (running)
     {
         CLEAR
-        printf("AUDIO RENAMER\n\n"
-               "volume=%.2f\n"
-               "directory=%s\n"
-               "last played song=%s\n\n",
-               "change volume           (v):\n"
-               "set or change directory (d):\n",
-               Settings.volume,
-               Settings.directory,
-               Settings.lastPlayedSong);
-        if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
-            printf("continue playing songs  (p):\n"
-                   "restart from begining   (r):\n");
-        else
-            printf("start playing           (p):\n");
-        printf("quit                    (q):\n"
-               "> ");
+        printStart();
 
         fgets(inp, 256, stdin);
         inp[strlen(inp) - 1] = '\0';
 
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
-        {
-            printf("enter volume (0.0 -> 1.0): ");
-            fgets(inp, 256, stdin);
-            Settings.volume = strtof(inp, NULL);
-        }
+            enterVolume(inp);
         else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
         {
             printf("enter full path to music directory: ");
@@ -245,4 +220,31 @@ void loadSettings()
     fread(&Settings.lastPlayedSong, 256, 1, settingsFile);
 
     fclose(settingsFile);
+}
+
+void printStart()
+{
+    printf("--- AUDIO RENAMER ---\n\n"
+           "> volume           = %.2f\n"
+           "> directory        = %s\n"
+           "> last played song = %s\n\n"
+           "> change volume           (v):\n"
+           "> set or change directory (d):\n",
+           Settings.volume,
+           Settings.directory,
+           Settings.lastPlayedSong);
+    if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
+        printf("> continue playing songs  (p):\n"
+               "> restart from begining   (r):\n");
+    else
+        printf("> start playing           (p):\n");
+    printf("> quit                    (q):\n"
+           "> ");
+}
+
+void enterVolume(char *input)
+{
+    printf("> enter volume (0.0 -> 1.0): ");
+    fgets(input, 256, stdin);
+    Settings.volume = strtof(input, NULL);
 }

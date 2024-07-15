@@ -19,3 +19,6 @@ void readSettings();
 
 void saveSettings();
 void loadSettings();
+
+void printStart();
+void enterVolume(char *input);
