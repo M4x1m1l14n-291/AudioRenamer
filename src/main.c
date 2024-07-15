@@ -65,9 +65,9 @@ void play(char const *filename, char *name, unsigned int retries)
     pid_t soundPid = fork();
     if (soundPid < 0)
     {
-        perror("forking error, trying again");
+        perror("forking error, trying again\n");
         if (retries > 5)
-            exit(1);
+            exit(5);
 
         play(filename, name, retries + 1);
     }
@@ -78,13 +78,7 @@ void play(char const *filename, char *name, unsigned int retries)
 
 start:
     CLEAR
-    printf("playing : %s\n\n"
-           "stop (s):\n"
-           "next (n):\n"
-           "edit (e):\n"
-           "quit (q):\n"
-           "> ",
-           name);
+    printOptions(name);
     fgets(input, 256, stdin);
     input[strlen(input) - 1] = '\0';
 
@@ -99,7 +93,6 @@ start:
     else if (!strcmp(input, "q") || !strcmp(input, "quit"))
     {
         kill(soundPid, SIGKILL);
-        waitpid(soundPid, NULL, 0);
         exit(0);
     }
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
@@ -151,7 +144,7 @@ void scanDirectory(char const *path)
     DIR *dir = opendir(path);
     if (dir == NULL)
     {
-        perror("error opening path");
+        perror("error opening path\n");
         return;
     }
 
@@ -229,6 +222,17 @@ void printStart()
         printf("> start playing           (p):\n");
     printf("> quit                    (q):\n"
            "> ");
+}
+
+void printOptions(char *name)
+{
+    printf("> playing : %s\n\n"
+           "> stop (s):\n"
+           "> next (n):\n"
+           "> edit (e):\n"
+           "> quit (q):\n"
+           "> ",
+           name);
 }
 
 void enterVolume(char *input)

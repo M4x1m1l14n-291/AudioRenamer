@@ -21,5 +21,6 @@ void saveSettings();
 void loadSettings();
 
 void printStart();
+void printOptions(char *name);
 void enterVolume(char *input);
 void enterDirectoryPath();
