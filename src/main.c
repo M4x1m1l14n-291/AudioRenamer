@@ -99,8 +99,7 @@ start:
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
     {
         editSong(filepath, name);
-        kill(soundPid, SIGKILL);
-        return;
+        goto start;
     }
     else
         goto start;
