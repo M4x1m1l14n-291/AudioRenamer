@@ -22,3 +22,4 @@ void loadSettings();
 
 void printStart();
 void enterVolume(char *input);
+void enterDirectoryPath();

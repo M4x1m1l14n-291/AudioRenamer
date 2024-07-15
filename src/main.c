@@ -48,18 +48,7 @@ int main()
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
             enterVolume(inp);
         else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
-        {
-            printf("enter full path to music directory: ");
-            fgets(Settings.directory, 255, stdin);
-            int len = strlen(Settings.directory);
-            Settings.directory[len-- - 1] = '\0';
-
-            if (Settings.directory[len - 1] != '/')
-            {
-                Settings.directory[len] = '/';
-                Settings.directory[len + 1] = '\0';
-            }
-        }
+            enterDirectoryPath();
         else if (!strcmp(inp, "play") || !strcmp(inp, "p"))
             playDir();
         else if (!strcmp(inp, "reset") || !strcmp(inp, "r"))
@@ -247,4 +236,18 @@ void enterVolume(char *input)
     printf("> enter volume (0.0 -> 1.0): ");
     fgets(input, 256, stdin);
     Settings.volume = strtof(input, NULL);
+}
+
+void enterDirectoryPath()
+{
+    printf("> enter full path to music directory: ");
+    fgets(Settings.directory, 255, stdin);
+    int len = strlen(Settings.directory);
+    Settings.directory[len-- - 1] = '\0';
+
+    if (Settings.directory[len - 1] != '/')
+    {
+        Settings.directory[len] = '/';
+        Settings.directory[len + 1] = '\0';
+    }
 }
