@@ -9,6 +9,7 @@
 #include "main.h"
 #include "linkedList.h"
 #include "playMusic.h"
+#include "renameSong.h"
 
 // #define CLEAR //
 #define CLEAR system("@cls||clear");
@@ -26,7 +27,7 @@ int playing = 1;
 
 int main()
 {
-    char inp[256] = {0};
+    char inp[16] = {""};
 
     char *homeDir = getenv("HOME");
     if (homeDir == NULL || strlen(homeDir) > 256 - 23)
@@ -42,7 +43,7 @@ int main()
         CLEAR
         printStart();
 
-        fgets(inp, 256, stdin);
+        fgets(inp, 16, stdin);
         inp[strlen(inp) - 1] = '\0';
 
         if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
@@ -60,7 +61,7 @@ int main()
     CLEAR
 }
 
-void play(char const *filename, char *name, unsigned int retries)
+void play(char const *filepath, char *name, unsigned int retries)
 {
     pid_t soundPid = fork();
     if (soundPid < 0)
@@ -69,10 +70,10 @@ void play(char const *filename, char *name, unsigned int retries)
         if (retries > 5)
             exit(5);
 
-        play(filename, name, retries + 1);
+        play(filepath, name, retries + 1);
     }
     else if (soundPid == 0)
-        playMusic(filename, Settings.volume);
+        playMusic(filepath, Settings.volume);
 
     char input[256];
 
@@ -97,6 +98,9 @@ start:
     }
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
     {
+        editSong(filepath, name);
+        kill(soundPid, SIGKILL);
+        return;
     }
     else
         goto start;

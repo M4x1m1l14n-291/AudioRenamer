@@ -5,7 +5,10 @@ struct settings
     char lastPlayedSong[256];
 };
 
+// play song
 void play(char const *filename, char *name, unsigned int retries);
+
+// play songs of a directory
 void playDir();
 
 // Scan the 'path' directory
@@ -20,7 +23,10 @@ void readSettings();
 void saveSettings();
 void loadSettings();
 
+// Print program settings
 void printStart();
+
+// Print song options
 void printOptions(char *name);
 void enterVolume(char *input);
 void enterDirectoryPath();

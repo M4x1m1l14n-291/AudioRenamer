@@ -5,7 +5,7 @@ CC := gcc
 CFLAGS := -Wall -Werror -Wextra
 
 # files to include
-FILES := src/main.c src/playMusic.c src/linkedList.c
+FILES := src/main.c src/playMusic.c src/linkedList.c src/renameSong.c
 
 # executable name
 NAME := AudioRenamer
