@@ -4,11 +4,11 @@
 
 #include "playMusic.h"
 
-void playMusic(char const *path, float volume)
+void playMusic(char const *filepath, float volume)
 {
     char vol[32];
     snprintf(vol, sizeof(vol), "volume=%f", volume);
 
-    execlp("/bin/ffplay", "ffplay", "-v", "0", "-nodisp", "-autoexit", "-af", vol, path, NULL);
+    execlp("/bin/ffplay", "ffplay", "-v", "0", "-nodisp", "-autoexit", "-af", vol, filepath, NULL);
     exit(0);
 }

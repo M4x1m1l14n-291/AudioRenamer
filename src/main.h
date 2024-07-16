@@ -2,31 +2,34 @@ struct settings
 {
     float volume;
     char directory[256];
-    char lastPlayedSong[256];
+    char last_played_song[256];
 };
 
-// play song
-void play(char const *filename, char *name, unsigned int retries);
+// print program menu
+void printProgramMenu();
 
-// play songs of a directory
-void playDir();
+// get volume from user input
+void inputVolume(char *user_input);
 
-// Scan the 'path' directory
+// get directory from user input
+void inputDirectory();
+
+// play all music from directory
+void playSongsInDirectory();
+
+// dispatch music playing and manage user input
+void play(char const *file_dir_path, char *name, unsigned int retries);
+
 void scanDirectory(char const *path);
 
-// Check if filename ends with m4a or mp3
+// check if file is an audio file
 int isAudioFile(char *filename);
 
-// Read settings from config file
+// read settings
 void readSettings();
 
+// save data to settings file
 void saveSettings();
+
+// load data from settings file
 void loadSettings();
-
-// Print program settings
-void printStart();
-
-// Print song options
-void printOptions(char *name);
-void enterVolume(char *input);
-void enterDirectoryPath();

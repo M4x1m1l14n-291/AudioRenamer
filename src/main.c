@@ -9,128 +9,189 @@
 #include "main.h"
 #include "linkedList.h"
 #include "playMusic.h"
-#include "renameSong.h"
 
-// #define CLEAR //
-#define CLEAR system("@cls||clear");
-
-struct ListNode *Files;
+struct list_node *Files;
 struct settings Settings = {1.0f, "", ""};
 
-FILE *settingsFile;
+FILE *settings_file = NULL;
 
-char dirBuf[256];
-char lastDir[256];
+char dir_buf[256];
+char last_dir[256];
 
 int running = 1;
 int playing = 1;
 
-int main()
+int main(void)
 {
-    char inp[16] = {""};
+    char user_input[16];
 
-    char *homeDir = getenv("HOME");
-    if (homeDir == NULL || strlen(homeDir) > 256 - 23)
+    char *home_dir = getenv("HOME");
+    if (home_dir == NULL || strlen(home_dir) > 256 - 23)
         printf("$HOME environment variable not set or $HOME environment variable to long\n");
     else
     {
-        snprintf(dirBuf, sizeof(dirBuf), "%s/.config/audioRename", homeDir);
-        readSettings(dirBuf);
+        snprintf(dir_buf, sizeof(dir_buf), "%s/.config/audioRename", home_dir);
+        readSettings(dir_buf);
     }
 
     while (running)
     {
-        CLEAR
-        printStart();
+        printProgramMenu();
 
-        fgets(inp, 16, stdin);
-        inp[strlen(inp) - 1] = '\0';
+        fgets(user_input, 16, stdin);
+        user_input[strlen(user_input) - 1] = '\0';
 
-        if (!strcmp(inp, "vol") || !strcmp(inp, "volume") || !strcmp(inp, "v"))
-            enterVolume(inp);
-        else if (!strcmp(inp, "dir") || !strcmp(inp, "directory") || !strcmp(inp, "d"))
-            enterDirectoryPath();
-        else if (!strcmp(inp, "play") || !strcmp(inp, "p"))
-            playDir();
-        else if (!strcmp(inp, "reset") || !strcmp(inp, "r"))
-            strcpy(Settings.lastPlayedSong, "");
-        else if (!strcmp(inp, "quit") || !strcmp(inp, "q"))
+        if (!strcmp(user_input, "vol") || !strcmp(user_input, "volume") || !strcmp(user_input, "v"))
+            inputVolume(user_input);
+        else if (!strcmp(user_input, "dir") || !strcmp(user_input, "directory") || !strcmp(user_input, "d"))
+            inputDirectory();
+        else if (!strcmp(user_input, "play") || !strcmp(user_input, "p"))
+            playSongsInDirectory();
+        else if (!strcmp(user_input, "reset") || !strcmp(user_input, "r"))
+            strcpy(Settings.last_played_song, "");
+        else if (!strcmp(user_input, "quit") || !strcmp(user_input, "q"))
             running = 0;
-        saveSettings(dirBuf);
+        saveSettings(dir_buf);
     }
-    CLEAR
+    system("@cls||clear");
+    exit(0);
 }
 
-void play(char const *filepath, char *name, unsigned int retries)
+void printProgramMenu()
 {
-    pid_t soundPid = fork();
-    if (soundPid < 0)
+    system("@cls||clear");
+    printf("--- AUDIO RENAMER ---\n"
+           "\n"
+           "> volume           = %.2f\n"
+           "> directory        = %s\n"
+           "> last played song = %s\n"
+           "\n"
+           "> change volume           (v):\n"
+           "> set or change directory (d):\n"
+           "%s"
+           "> quit                    (q):\n"
+           "> ",
+           Settings.volume,
+           Settings.directory,
+           Settings.last_played_song,
+           strlen(Settings.directory) > 0 && strlen(Settings.last_played_song) > 0
+               ? "> continue playing songs  (p):\n"
+                 "> restart from begining   (r):\n"
+               : "> start playing           (p):\n");
+}
+
+void inputVolume(char *user_input)
+{
+    printf("> enter volume (0.0 -> 1.0): ");
+    fgets(user_input, 16, stdin);
+    Settings.volume = strtof(user_input, NULL);
+}
+
+void inputDirectory()
+{
+    printf("> enter full path to music directory: ");
+    fgets(Settings.directory, 255, stdin);
+    int len = strlen(Settings.directory);
+    Settings.directory[len-- - 1] = '\0';
+
+    if (Settings.directory[len - 1] != '/')
+    {
+        Settings.directory[len] = '/';
+        Settings.directory[len + 1] = '\0';
+    }
+}
+
+void playSongsInDirectory()
+{
+    system("@cls||clear");
+    if (strcmp(Settings.directory, last_dir))
+        scanDirectory(Settings.directory);
+    strcpy(last_dir, Settings.directory);
+
+    struct list_node *item = Files;
+    struct list_node *test = Files;
+
+    for (; test; test = test->next)
+        if (!strcmp(test->name, Settings.last_played_song))
+            item = test;
+
+    for (; item && playing; item = item->next)
+    {
+        strcpy(Settings.last_played_song, item->name);
+        saveSettings();
+        play(Settings.directory, item->name, 0);
+    }
+    playing = 1;
+}
+
+void play(char const *file_dir_path, char *name, unsigned int retries)
+{
+    char input[16];
+
+    // full path of file
+    char path_name[512];
+    sprintf(path_name, "%s%s", Settings.directory, name);
+
+    // get file type ending
+    int name_len = strlen(name);
+    char file_type_ending[4] = {name[name_len - 3], name[name_len - 2], name[name_len - 1], '\0'};
+
+    // fork process for playing audio files
+    pid_t play_music_pid = fork();
+    if (play_music_pid < 0)
     {
         perror("forking error, trying again\n");
         if (retries > 5)
             exit(5);
 
-        play(filepath, name, retries + 1);
+        play(file_dir_path, name, retries + 1);
     }
-    else if (soundPid == 0)
-        playMusic(filepath, Settings.volume);
-
-    char input[256];
+    else if (play_music_pid == 0)
+        playMusic(path_name, Settings.volume);
 
 start:
-    CLEAR
-    printOptions(name);
-    fgets(input, 256, stdin);
+    system("@cls||clear");
+    printf("> playing : %s\n\n"
+           "> stop (s):\n"
+           "> next (n):\n"
+           "> edit (e):\n"
+           "> quit (q):\n"
+           "> ",
+           name);
+
+    // get user input
+    fgets(input, 16, stdin);
     input[strlen(input) - 1] = '\0';
 
     if (!strcmp(input, "s") || !strcmp(input, "stop"))
     {
-        kill(soundPid, SIGKILL);
+        kill(play_music_pid, SIGKILL);
         playing = 0;
-        return;
     }
     else if (!strcmp(input, "n") || !strcmp(input, "next"))
-        kill(soundPid, SIGKILL);
+        kill(play_music_pid, SIGKILL);
+
     else if (!strcmp(input, "q") || !strcmp(input, "quit"))
     {
-        kill(soundPid, SIGKILL);
+        kill(play_music_pid, SIGKILL);
         exit(0);
     }
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
     {
-        editSong(filepath, name);
-        goto start;
+        /*
+        char *changed_name = edit_music_file(file_dir_path, name, file_type_ending);
+        if (changed_name)
+        {
+            kill(play_music_pid, SIGKILL);
+            // rename file in list
+            return;
+        }
+        */
     }
     else
         goto start;
 
-    waitpid(soundPid, NULL, 0);
-}
-
-void playDir()
-{
-    CLEAR
-    if (strcmp(Settings.directory, lastDir))
-        scanDirectory(Settings.directory);
-    strcpy(lastDir, Settings.directory);
-
-    struct ListNode *item = Files;
-    struct ListNode *test = Files;
-
-    for (; test; test = test->next)
-        if (!strcmp(test->name, Settings.lastPlayedSong))
-            item = test;
-
-    for (; item && playing; item = item->next)
-    {
-        char pathAndName[512];
-        sprintf(pathAndName, "%s%s", Settings.directory, item->name);
-
-        strcpy(Settings.lastPlayedSong, item->name);
-        saveSettings();
-        play(pathAndName, item->name, 0);
-    }
-    playing = 1;
+    waitpid(play_music_pid, NULL, 0);
 }
 
 void scanDirectory(char const *path)
@@ -138,7 +199,8 @@ void scanDirectory(char const *path)
     if (Files)
         freeNodes(Files);
 
-    Files = malloc(sizeof(struct ListNode));
+    // allocate data in heap for first node in list
+    Files = malloc(sizeof(struct list_node));
     strcpy(Files->name, "");
     Files->next = NULL;
     Files->prev = NULL;
@@ -148,20 +210,19 @@ void scanDirectory(char const *path)
     if (dir == NULL)
     {
         perror("error opening path\n");
-        return;
+        exit(1);
     }
 
+    // read files from directory
     while ((entry = readdir(dir)) != NULL)
     {
         if (entry->d_name[0] == '.' || entry->d_type == 4 || !isAudioFile(entry->d_name))
             continue;
-
         appendNode(Files, entry->d_name);
     }
 
-    sortListAlpha(Files);
-
-    // printList(Files);
+    // sort files alphabeticaly
+    alphaSort(Files);
     closedir(dir);
 }
 
@@ -181,80 +242,28 @@ int isAudioFile(char *filename)
 
 void readSettings()
 {
-    if ((settingsFile = fopen(dirBuf, "rb")) == NULL)
-        saveSettings(dirBuf);
+    if ((settings_file = fopen(dir_buf, "rb")) == NULL)
+        saveSettings(dir_buf);
     else
         loadSettings();
 }
 
 void saveSettings()
 {
-    settingsFile = fopen(dirBuf, "w+b");
+    settings_file = fopen(dir_buf, "w+b");
 
-    fwrite(&Settings.volume, 4, 1, settingsFile);
-    fwrite(&Settings.directory, 256, 1, settingsFile);
-    fwrite(&Settings.lastPlayedSong, 256, 1, settingsFile);
+    fwrite(&Settings.volume, 4, 1, settings_file);
+    fwrite(&Settings.directory, 256, 1, settings_file);
+    fwrite(&Settings.last_played_song, 256, 1, settings_file);
 
-    fclose(settingsFile);
+    fclose(settings_file);
 }
 
 void loadSettings()
 {
-    fread(&Settings.volume, 4, 1, settingsFile);
-    fread(&Settings.directory, 256, 1, settingsFile);
-    fread(&Settings.lastPlayedSong, 256, 1, settingsFile);
+    fread(&Settings.volume, 4, 1, settings_file);
+    fread(&Settings.directory, 256, 1, settings_file);
+    fread(&Settings.last_played_song, 256, 1, settings_file);
 
-    fclose(settingsFile);
-}
-
-void printStart()
-{
-    printf("--- AUDIO RENAMER ---\n\n"
-           "> volume           = %.2f\n"
-           "> directory        = %s\n"
-           "> last played song = %s\n\n"
-           "> change volume           (v):\n"
-           "> set or change directory (d):\n",
-           Settings.volume,
-           Settings.directory,
-           Settings.lastPlayedSong);
-    if (strlen(Settings.directory) > 0 && strlen(Settings.lastPlayedSong) > 0)
-        printf("> continue playing songs  (p):\n"
-               "> restart from begining   (r):\n");
-    else
-        printf("> start playing           (p):\n");
-    printf("> quit                    (q):\n"
-           "> ");
-}
-
-void printOptions(char *name)
-{
-    printf("> playing : %s\n\n"
-           "> stop (s):\n"
-           "> next (n):\n"
-           "> edit (e):\n"
-           "> quit (q):\n"
-           "> ",
-           name);
-}
-
-void enterVolume(char *input)
-{
-    printf("> enter volume (0.0 -> 1.0): ");
-    fgets(input, 256, stdin);
-    Settings.volume = strtof(input, NULL);
-}
-
-void enterDirectoryPath()
-{
-    printf("> enter full path to music directory: ");
-    fgets(Settings.directory, 255, stdin);
-    int len = strlen(Settings.directory);
-    Settings.directory[len-- - 1] = '\0';
-
-    if (Settings.directory[len - 1] != '/')
-    {
-        Settings.directory[len] = '/';
-        Settings.directory[len + 1] = '\0';
-    }
+    fclose(settings_file);
 }
