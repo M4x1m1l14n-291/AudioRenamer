@@ -45,25 +45,28 @@ start:
     {
         printf("> enter artist: ");
         fgets(Metadata->artist, 256, stdin);
+        Metadata->artist[strlen(Metadata->artist) - 1] = '\0';
     }
     else if (!strcmp(input, "t") || !strcmp(input, "title"))
     {
         printf("> enter title: ");
         fgets(Metadata->title, 256, stdin);
+        Metadata->title[strlen(Metadata->title) - 1] = '\0';
     }
     else if (!strcmp(input, "f") || !strcmp(input, "fav") || !strcmp(input, "favorite"))
-    {
         Metadata->favorite = !Metadata->favorite;
-    }
+
     else if (!strcmp(input, "r") || !strcmp(input, "ren") || !strcmp(input, "rename"))
     {
     }
     else if (!strcmp(input, "c") || !strcmp(input, "cancel"))
         goto end;
+
     else if (!strcmp(input, "d") || !strcmp(input, "done"))
     {
         goto end;
     }
+
     goto start;
 
 end:

@@ -29,6 +29,7 @@ int main(void)
     char *home_dir = getenv("HOME");
     if (home_dir == NULL || strlen(home_dir) > 256 - 23)
         printf("$HOME environment variable not set or $HOME environment variable to long\n");
+
     else
     {
         snprintf(dir_buf, sizeof(dir_buf), "%s/.config/audioRename", home_dir);
@@ -44,14 +45,19 @@ int main(void)
 
         if (!strcmp(user_input, "vol") || !strcmp(user_input, "volume") || !strcmp(user_input, "v"))
             inputVolume(user_input);
+
         else if (!strcmp(user_input, "dir") || !strcmp(user_input, "directory") || !strcmp(user_input, "d"))
             inputDirectory();
+
         else if (!strcmp(user_input, "play") || !strcmp(user_input, "p"))
             playSongsInDirectory();
+
         else if (!strcmp(user_input, "reset") || !strcmp(user_input, "r"))
             strcpy(Settings.last_played_song, "");
+
         else if (!strcmp(user_input, "quit") || !strcmp(user_input, "q"))
             running = 0;
+
         saveSettings(dir_buf);
     }
     system("@cls||clear");
