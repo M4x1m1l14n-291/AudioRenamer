@@ -1,15 +1,15 @@
-typedef struct list_node
+typedef struct ListNode
 {
     char name[256];
-    struct list_node *next;
-    struct list_node *prev;
-} list_node;
+    struct ListNode *next;
+    struct ListNode *prev;
+} ListNode;
 
-void appendNode(struct list_node *list, char *name);
-void swapNodes(list_node *node1, list_node *node2);
+void appendNode(struct ListNode *list, char *name);
+void swapNodes(ListNode *node1, ListNode *node2);
 
-void alphaSort(list_node *list);
+void alphaSort(ListNode *list);
 
-void freeNodes(list_node *node);
+void freeNodes(ListNode *node);
 
-void printList(struct list_node *list);
+void printList(struct ListNode *list);

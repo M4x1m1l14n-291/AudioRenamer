@@ -9,9 +9,10 @@
 #include "main.h"
 #include "linkedList.h"
 #include "playMusic.h"
+#include "editSong.h"
 
-struct list_node *Files;
-struct settings Settings = {1.0f, "", ""};
+struct ListNode *Files;
+struct Settings Settings = {1.0f, "", ""};
 
 FILE *settings_file = NULL;
 
@@ -90,7 +91,7 @@ void inputVolume(char *user_input)
 void inputDirectory()
 {
     printf("> enter full path to music directory: ");
-    fgets(Settings.directory, 255, stdin);
+    fgets(Settings.directory, 256, stdin);
     int len = strlen(Settings.directory);
     Settings.directory[len-- - 1] = '\0';
 
@@ -108,8 +109,8 @@ void playSongsInDirectory()
         scanDirectory(Settings.directory);
     strcpy(last_dir, Settings.directory);
 
-    struct list_node *item = Files;
-    struct list_node *test = Files;
+    struct ListNode *item = Files;
+    struct ListNode *test = Files;
 
     for (; test; test = test->next)
         if (!strcmp(test->name, Settings.last_played_song))
@@ -129,8 +130,8 @@ void play(char const *file_dir_path, char *name, unsigned int retries)
     char input[16];
 
     // full path of file
-    char path_name[512];
-    sprintf(path_name, "%s%s", Settings.directory, name);
+    char path_and_name[512];
+    sprintf(path_and_name, "%s%s", Settings.directory, name);
 
     // get file type ending
     int name_len = strlen(name);
@@ -147,11 +148,11 @@ void play(char const *file_dir_path, char *name, unsigned int retries)
         play(file_dir_path, name, retries + 1);
     }
     else if (play_music_pid == 0)
-        playMusic(path_name, Settings.volume);
+        playMusic(path_and_name, Settings.volume);
 
 start:
     system("@cls||clear");
-    printf("> playing : %s\n\n"
+    printf("> playing: %s\n\n"
            "> stop (s):\n"
            "> next (n):\n"
            "> edit (e):\n"
@@ -178,15 +179,10 @@ start:
     }
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
     {
-        /*
-        char *changed_name = edit_music_file(file_dir_path, name, file_type_ending);
-        if (changed_name)
-        {
+        int renamed = editSong(path_and_name, name, file_type_ending);
+        if (renamed)
             kill(play_music_pid, SIGKILL);
-            // rename file in list
-            return;
-        }
-        */
+        goto start;
     }
     else
         goto start;
@@ -200,7 +196,7 @@ void scanDirectory(char const *path)
         freeNodes(Files);
 
     // allocate data in heap for first node in list
-    Files = malloc(sizeof(struct list_node));
+    Files = malloc(sizeof(struct ListNode));
     strcpy(Files->name, "");
     Files->next = NULL;
     Files->prev = NULL;

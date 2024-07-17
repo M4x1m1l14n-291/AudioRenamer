@@ -4,7 +4,7 @@
 
 #include "linkedList.h"
 
-void appendNode(struct list_node *list, char *name)
+void appendNode(struct ListNode *list, char *name)
 {
     if (strlen(list->name) == 0)
     {
@@ -12,7 +12,7 @@ void appendNode(struct list_node *list, char *name)
         return;
     }
 
-    struct list_node *node = malloc(sizeof(struct list_node));
+    struct ListNode *node = malloc(sizeof(struct ListNode));
     strcpy(node->name, name);
 
     for (; list->next != NULL; list = list->next)
@@ -22,7 +22,7 @@ void appendNode(struct list_node *list, char *name)
     node->prev = list;
 }
 
-void swapNodes(list_node *node1, list_node *node2)
+void swapNodes(ListNode *node1, ListNode *node2)
 {
     char temp[256];
     strcpy(temp, node1->name);
@@ -30,9 +30,14 @@ void swapNodes(list_node *node1, list_node *node2)
     strcpy(node2->name, temp);
 }
 
-void alphaSort(list_node *list)
+void editnode(ListNode *node, char *name)
 {
-    list_node *first = list;
+    strcpy(node->name, name);
+}
+
+void alphaSort(ListNode *list)
+{
+    ListNode *first = list;
 
     int sorted = 0;
 
@@ -54,14 +59,14 @@ void alphaSort(list_node *list)
     }
 }
 
-void freeNodes(list_node *node)
+void freeNodes(ListNode *node)
 {
     if (node->next != NULL)
         freeNodes(node->next);
     free(node);
 }
 
-void printList(struct list_node *list)
+void printList(struct ListNode *list)
 {
     for (; list; list = list->next)
         printf("%s\n", list->name);

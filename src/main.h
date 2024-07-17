@@ -1,9 +1,9 @@
-struct settings
+struct Settings
 {
     float volume;
     char directory[256];
     char last_played_song[256];
-};
+} Settings;
 
 // print program menu
 void printProgramMenu();
