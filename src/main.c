@@ -141,7 +141,7 @@ void play(char const *file_dir_path, char *name, unsigned int retries)
 
     // get file type ending
     int name_len = strlen(name);
-    char file_type_ending[4] = {name[name_len - 3], name[name_len - 2], name[name_len - 1], '\0'};
+    char file_type_ending[5] = {name[name_len - 4], name[name_len - 3], name[name_len - 2], name[name_len - 1], '\0'};
 
     // fork process for playing audio files
     pid_t play_music_pid = fork();

@@ -58,6 +58,10 @@ start:
 
     else if (!strcmp(input, "r") || !strcmp(input, "ren") || !strcmp(input, "rename"))
     {
+        printf("> enter custom file name: ");
+        fgets(final_name, 1024, stdin);
+        final_name[strlen(final_name) - 1] = '\0';
+        strcat(final_name, file_type_ending);
     }
     else if (!strcmp(input, "c") || !strcmp(input, "cancel"))
         goto end;
