@@ -80,6 +80,9 @@ start:
         else if (strlen(Metadata->artist) > 0 && strlen(Metadata->title) > 0)
             snprintf(final_name, 256, "%s - %s", Metadata->artist, Metadata->title);
 
+        else if (strlen(Metadata->artist) == 0 && strlen(Metadata->title) == 0)
+            goto reset_name;
+
         strcat(final_name, file_type_ending);
         printf("> new name = %s\n"
                "> confirm changes? (c): ",
