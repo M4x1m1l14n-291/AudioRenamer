@@ -128,6 +128,9 @@ void playSongsInDirectory()
         strcpy(Settings.last_played_song, item->name);
         saveSettings();
     }
+    if (item == NULL)
+        strcpy(Settings.last_played_song, "");
+
     playing = 1;
 }
 
@@ -158,7 +161,8 @@ void play(char const *file_dir_path, char *name, unsigned int retries)
 
 start:
     system("@cls||clear");
-    printf("> playing: %s\n\n"
+    printf("> playing: %s\n"
+           "\n"
            "> stop (s):\n"
            "> next (n):\n"
            "> edit (e):\n"
