@@ -13,3 +13,4 @@ CLI Program to rename audio files while listening to them.
 
 - [x] rename files
 - [ ] convert files
+- [ ] change file metadata to reflect file name
