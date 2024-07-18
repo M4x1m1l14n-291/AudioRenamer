@@ -6,4 +6,4 @@ struct Metadata
 };
 
 // set artist, title and favorite of a song
-int editSong(char *path_and_name, char *name, char *file_type_ending);
+int editSong(char *path, char *path_and_name, char *name, char *file_type_ending);

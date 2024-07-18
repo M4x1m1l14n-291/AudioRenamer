@@ -124,9 +124,9 @@ void playSongsInDirectory()
 
     for (; item && playing; item = item->next)
     {
+        play(Settings.directory, item->name, 0);
         strcpy(Settings.last_played_song, item->name);
         saveSettings();
-        play(Settings.directory, item->name, 0);
     }
     playing = 1;
 }
@@ -185,11 +185,10 @@ start:
     }
     else if (!strcmp(input, "e") || !strcmp(input, "edit"))
     {
-        int renamed = editSong(path_and_name, name, file_type_ending);
-        if (renamed)
-            kill(play_music_pid, SIGKILL);
+        editSong(Settings.directory, path_and_name, name, file_type_ending);
         goto start;
     }
+
     else
         goto start;
 
