@@ -62,6 +62,7 @@ start:
 
     else if (!strcmp(input, "r") || !strcmp(input, "ren") || !strcmp(input, "rename"))
     {
+        printf("> WIP! \n");
         /*
         printf("> enter custom file name: ");
         fgets(short_name, 256, stdin);
