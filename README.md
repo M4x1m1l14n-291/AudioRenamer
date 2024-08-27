@@ -7,6 +7,7 @@ CLI Program to rename audio files while listening to them.
 ## Requirements
 
 - ffmpeg (ffplay)
+- gcc
 - Arch Linux (not tested on any other systems)
 
 ## Todo:
