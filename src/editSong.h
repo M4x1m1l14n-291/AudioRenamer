@@ -1,5 +1,4 @@
-struct Metadata
-{
+struct Metadata {
     int favorite;
     char artist[256];
     char title[256];

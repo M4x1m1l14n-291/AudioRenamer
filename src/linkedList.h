@@ -1,5 +1,4 @@
-typedef struct ListNode
-{
+typedef struct ListNode {
     char name[256];
     struct ListNode *next;
     struct ListNode *prev;

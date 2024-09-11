@@ -14,10 +14,10 @@ NAME := AudioRenamer
 all: clean build run
 
 build:
-	$(CC) $(FILES) -o $(NAME)
+	$(CC) -o $(NAME) $(FILES)
 
 debug_build:
-	$(CC) -g $(CFLAGS) $(FILES) -o $(NAME)
+	$(CC) -o $(NAME) -g $(CFLAGS) $(FILES)
 
 debug: clean debug_build
 	gdb $(NAME) -tui
